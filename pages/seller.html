@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Seller Hub — Naomie Shophub</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+  <style>
+    .badge-pending  { background:#fefcbf;color:#744210; }
+    .badge-confirmed{ background:#c6f6d5;color:#22543d; }
+    .badge-cancelled{ background:#fee2e2;color:#991b1b; }
+    .badge-shipped  { background:#bee3f8;color:#2a4365; }
+    .badge-delivered{ background:#e9d8fd;color:#553c9a; }
+    .orders-table { width:100%;border-collapse:collapse;font-size:.875rem; }
+    .orders-table th { text-align:left;padding:12px 16px;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--gray-500);border-bottom:2px solid var(--gray-200);background:var(--gray-50); }
+    .orders-table td { padding:14px 16px;border-bottom:1px solid var(--gray-100);color:var(--gray-700);vertical-align:middle; }
+    .orders-table tr:last-child td { border-bottom:none; }
+    .orders-table tr:hover td { background:var(--gray-50); }
+    .form-grid { display:grid;grid-template-columns:1fr 1fr;gap:14px; }
+    .form-grid .form-group { margin-bottom:0; }
+    .form-grid .form-group.full { grid-column:1/-1; }
+    .section { display:none; }
+    .section.active { display:block; }
+    @media (max-width:600px) { .form-grid { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <a class="navbar-logo" href="../index.html">Naomie <span>Shophub</span></a>
+    <div class="navbar-links">
+      <a href="../index.html">Home</a>
+    </div>
+    <div id="nav-user-area"></div>
+  </nav>
+
+  <div class="dashboard-layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-title">Seller Hub</div>
+      <button class="sidebar-link active" onclick="showSection('sec-orders', this)">📦 Orders</button>
+      <button class="sidebar-link" onclick="showSection('sec-products', this)">🛍️ Create Product</button>
+      <button class="sidebar-link" onclick="showSection('sec-shops', this)">🏪 Create Shop</button>
+      <button class="sidebar-link" id="notif-sidebar-btn" onclick="showSection('sec-notifications', this)">
+        🔔 Notifications
+        <span class="sidebar-badge" id="notif-count" style="display:none;">0</span>
+      </button>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="dashboard-content">
+
+      <!-- Orders -->
+      <div class="section active" id="sec-orders">
+        <div class="page-title">Orders</div>
+        <p class="page-sub">View and manage incoming orders</p>
+        <div class="card" style="padding:0;overflow:hidden;">
+          <div id="orders-loader" class="loader" style="padding:20px;"><span class="spinner"></span> Loading…</div>
+          <div id="orders-error" style="display:none;padding:20px;color:#c53030;font-size:.875rem;"></div>
+          <div style="overflow-x:auto;">
+            <table class="orders-table" id="orders-table" style="display:none;">
+              <thead><tr><th>Order ID</th><th>Product</th><th>Qty</th><th>Price</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead>
+              <tbody id="orders-tbody"></tbody>
+            </table>
+          </div>
+          <div class="empty-state" id="orders-empty" style="display:none;"><div>📦</div>No orders found.</div>
+        </div>
+      </div>
+
+      <!-- Create Product -->
+      <div class="section" id="sec-products">
+        <div class="page-title">Create Product</div>
+        <p class="page-sub">Add a new product to your catalog</p>
+        <div class="card">
+          <div class="form-error" id="product-error" style="display:none;margin-bottom:14px;"></div>
+          <div class="form-success" id="product-success" style="display:none;background:#f0fff4;border:1px solid #9ae6b4;color:#276749;border-radius:8px;padding:10px 14px;font-size:.85rem;margin-bottom:14px;"></div>
+          <div class="form-grid">
+            <div class="form-group"><label>Name *</label><input type="text" id="prod-name" placeholder="e.g. Running Shoes"/></div>
+            <div class="form-group"><label>Size *</label><input type="text" id="prod-size" placeholder="e.g. 42, L, M"/></div>
+            <div class="form-group"><label>Price *</label><input type="number" id="prod-price" placeholder="e.g. 49.99" min="0" step="0.01"/></div>
+            <div class="form-group"><label>Type *</label>
+              <select id="prod-type"><option value="male">Male</option><option value="female">Female</option><option value="unisex">Unisex</option></select>
+            </div>
+            <div class="form-group full"><label>Description</label><input type="text" id="prod-desc" placeholder="Short product description"/></div>
+            <div class="form-group full"><label>Status *</label>
+              <select id="prod-status"><option value="available">Available</option><option value="unvailable">Unavailable</option></select>
+            </div>
+            <div class="form-group full"><button class="btn btn-blue" id="btn-product" onclick="submitProduct()" style="width:100%;justify-content:center;">Create Product</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Create Shop -->
+      <div class="section" id="sec-shops">
+        <div class="page-title">Create Shop</div>
+        <p class="page-sub">Register a new shop on the platform</p>
+        <div class="card">
+          <div class="form-error" id="shop-error" style="display:none;margin-bottom:14px;"></div>
+          <div class="form-success" id="shop-success" style="display:none;background:#f0fff4;border:1px solid #9ae6b4;color:#276749;border-radius:8px;padding:10px 14px;font-size:.85rem;margin-bottom:14px;"></div>
+          <div class="form-grid">
+            <div class="form-group full"><label>Shop Name *</label><input type="text" id="shop-name" placeholder="e.g. Kigali Fashion Store"/></div>
+            <div class="form-group full"><label>Description</label><input type="text" id="shop-desc" placeholder="What does your shop sell?"/></div>
+            <div class="form-group"><label>Contact *</label><input type="text" id="shop-contact" placeholder="e.g. +1234567890"/></div>
+            <div class="form-group"><label>Status *</label>
+              <select id="shop-status"><option value="active">Active</option><option value="inactive">Inactive</option><option value="pending">Pending</option></select>
+            </div>
+            <div class="form-group full"><button class="btn btn-blue" id="btn-shop" onclick="submitShop()" style="width:100%;justify-content:center;">Create Shop</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notifications -->
+      <div class="section" id="sec-notifications">
+        <div class="page-title">Notifications</div>
+        <p class="page-sub">Order alerts — approve or cancel directly from here</p>
+        <div class="notif-panel">
+          <div class="notif-header">
+            <h3>🔔 Order Notifications</h3>
+            <button class="btn btn-sm btn-gray" onclick="markAllRead()">Mark all read</button>
+          </div>
+          <div class="notif-list" id="notif-list">
+            <div class="notif-empty"><span class="spinner"></span> Loading…</div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <div class="toast-wrap" id="toast-wrap"></div>
+
+  <script src="../js/auth.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/helper.js"></script>
+  <script>
+    requireLogin();
+    requireRole('admin', 'seller');
+    updateNavbar();
+
+    var allNotifications = [];
+
+    function showSection(id, btn) {
+      document.querySelectorAll('.section').forEach(function(s) { s.classList.remove('active'); });
+      document.querySelectorAll('.sidebar-link').forEach(function(b) { b.classList.remove('active'); });
+      document.getElementById(id).classList.add('active');
+      btn.classList.add('active');
+    }
+
+    /* ── Orders ── */
+    function getOrderBadge(status) {
+      if (status === 'confirmed') return 'badge-confirmed';
+      if (status === 'cancelled') return 'badge-cancelled';
+      if (status === 'shipped') return 'badge-shipped';
+      if (status === 'delivered') return 'badge-delivered';
+      return 'badge-pending';
+    }
+
+    function changeOrderStatus(id, status) {
+      api.updateOrderStatus(id, status).then(function() {
+        showToast('Order ' + status + '.', 'success');
+        loadOrders();
+        loadNotifications();
+      }).catch(function() { showToast('Failed to update order.', 'error'); });
+    }
+
+    function loadOrders() {
+      document.getElementById('orders-loader').style.display = 'flex';
+      api.getAllOrders().then(function(data) {
+        document.getElementById('orders-loader').style.display = 'none';
+        var orders = Array.isArray(data) ? data : (data.orders || data.data || []);
+        var tbody = document.getElementById('orders-tbody');
+        if (!orders.length) {
+          document.getElementById('orders-table').style.display = 'none';
+          document.getElementById('orders-empty').style.display = 'block';
+          return;
+        }
+        document.getElementById('orders-empty').style.display = 'none';
+        document.getElementById('orders-table').style.display = 'table';
+        tbody.innerHTML = orders.map(function(o) {
+          var canAct = o.status === 'pending' || !o.status;
+          return '<tr>' +
+            '<td>' + (o.id ? o.id.slice(0,8) + '…' : '—') + '</td>' +
+            '<td>' + (o.prodId ? o.prodId.slice(0,8) + '…' : '—') + '</td>' +
+            '<td>' + (o.quantity || '—') + '</td>' +
+            '<td>$' + (o.price || '—') + '</td>' +
+            '<td><span class="badge ' + getOrderBadge(o.status) + '">' + (o.status || 'pending') + '</span></td>' +
+            '<td>' + (o.orderDate ? new Date(o.orderDate).toLocaleDateString() : '—') + '</td>' +
+            '<td style="display:flex;gap:6px;">' +
+              (canAct
+                ? '<button class="btn btn-green btn-sm" onclick="changeOrderStatus(\'' + o.id + '\',\'confirmed\')">Approve</button>' +
+                  '<button class="btn btn-red btn-sm" onclick="changeOrderStatus(\'' + o.id + '\',\'cancelled\')">Cancel</button>'
+                : '<span style="color:var(--gray-400);font-size:.8rem;">—</span>') +
+            '</td>' +
+          '</tr>';
+        }).join('');
+      }).catch(function() {
+        document.getElementById('orders-loader').style.display = 'none';
+        document.getElementById('orders-error').textContent = 'Failed to load orders.';
+        document.getElementById('orders-error').style.display = 'block';
+      });
+    }
+
+    /* ── Notifications ── */
+    function renderNotifications(notifs) {
+      var container = document.getElementById('notif-list');
+      if (!notifs.length) {
+        container.innerHTML = '<div class="notif-empty">🎉 No notifications yet.</div>';
+        return;
+      }
+      container.innerHTML = notifs.map(function(n) {
+        var isRead = n.isRead || n.read;
+        var orderId = n.orderId || n.order_id || '';
+        return '<div class="notif-item ' + (isRead ? 'read' : 'unread') + '" id="notif-' + n.id + '">' +
+          '<div class="notif-dot"></div>' +
+          '<div class="notif-body">' +
+            '<div class="notif-msg">' + (n.message || 'New order received') + '</div>' +
+            '<div class="notif-time">' + (n.createdAt ? new Date(n.createdAt).toLocaleString() : '') + '</div>' +
+          '</div>' +
+          '<div class="notif-actions">' +
+            (!isRead ? '<button class="btn btn-sm btn-gray" onclick="markRead(\'' + n.id + '\')">✓</button>' : '') +
+            (orderId ? '<button class="btn btn-sm btn-green" onclick="changeOrderStatus(\'' + orderId + '\',\'confirmed\')">Approve</button>' +
+            '<button class="btn btn-sm btn-red" onclick="changeOrderStatus(\'' + orderId + '\',\'cancelled\')">Cancel</button>' : '') +
+          '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    function markRead(id) {
+      api.markNotificationRead(id).then(function() {
+        var item = document.getElementById('notif-' + id);
+        if (item) { item.classList.remove('unread'); item.classList.add('read'); }
+        updateNotifBadge(-1);
+      }).catch(function() { showToast('Failed to mark read.', 'error'); });
+    }
+
+    function markAllRead() {
+      var unread = allNotifications.filter(function(n) { return !n.isRead && !n.read; });
+      Promise.all(unread.map(function(n) { return api.markNotificationRead(n.id); })).then(function() {
+        loadNotifications();
+        showToast('All marked as read.', 'success');
+      });
+    }
+
+    function updateNotifBadge(delta) {
+      var el = document.getElementById('notif-count');
+      var next = Math.max(0, (parseInt(el.textContent) || 0) + delta);
+      el.textContent = next;
+      el.style.display = next > 0 ? 'inline-block' : 'none';
+    }
+
+    function loadNotifications() {
+      api.getNotifications().then(function(data) {
+        allNotifications = Array.isArray(data) ? data : (data.notifications || data.data || []);
+        var unread = allNotifications.filter(function(n) { return !n.isRead && !n.read; }).length;
+        var badge = document.getElementById('notif-count');
+        badge.textContent = unread;
+        badge.style.display = unread > 0 ? 'inline-block' : 'none';
+        renderNotifications(allNotifications);
+      }).catch(function() {
+        document.getElementById('notif-list').innerHTML = '<div class="notif-empty">Could not load notifications.</div>';
+      });
+    }
+
+    /* ── Product form ── */
+    function submitProduct() {
+      var name = document.getElementById('prod-name').value.trim();
+      var size = document.getElementById('prod-size').value.trim();
+      var price = parseFloat(document.getElementById('prod-price').value);
+      var type = document.getElementById('prod-type').value;
+      var desc = document.getElementById('prod-desc').value.trim();
+      var status = document.getElementById('prod-status').value;
+      var errorEl = document.getElementById('product-error');
+      var successEl = document.getElementById('product-success');
+      errorEl.style.display = 'none'; successEl.style.display = 'none';
+      if (!name || !size || isNaN(price)) { errorEl.textContent = 'Name, size, and price are required.'; errorEl.style.display = 'block'; return; }
+      var btn = document.getElementById('btn-product');
+      btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Creating…';
+      api.createProduct({ name, size, price, type, description: desc, status }).then(function() {
+        successEl.textContent = 'Product created successfully!'; successEl.style.display = 'block';
+        btn.disabled = false; btn.textContent = 'Create Product';
+        ['prod-name','prod-size','prod-price','prod-desc'].forEach(function(id) { document.getElementById(id).value = ''; });
+      }).catch(function(err) {
+        errorEl.textContent = err.message || 'Failed to create product.'; errorEl.style.display = 'block';
+        btn.disabled = false; btn.textContent = 'Create Product';
+      });
+    }
+
+    /* ── Shop form ── */
+    function submitShop() {
+      var name = document.getElementById('shop-name').value.trim();
+      var desc = document.getElementById('shop-desc').value.trim();
+      var contact = document.getElementById('shop-contact').value.trim();
+      var status = document.getElementById('shop-status').value;
+      var errorEl = document.getElementById('shop-error');
+      var successEl = document.getElementById('shop-success');
+      errorEl.style.display = 'none'; successEl.style.display = 'none';
+      if (!name || !contact) { errorEl.textContent = 'Shop name and contact are required.'; errorEl.style.display = 'block'; return; }
+      var btn = document.getElementById('btn-shop');
+      btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Creating…';
+      api.createShop({ name, description: desc, contact, status }).then(function() {
+        successEl.textContent = 'Shop created successfully!'; successEl.style.display = 'block';
+        btn.disabled = false; btn.textContent = 'Create Shop';
+        ['shop-name','shop-desc','shop-contact'].forEach(function(id) { document.getElementById(id).value = ''; });
+      }).catch(function(err) {
+        errorEl.textContent = err.message || 'Failed to create shop.'; errorEl.style.display = 'block';
+        btn.disabled = false; btn.textContent = 'Create Shop';
+      });
+    }
+
+    /* ── Init ── */
+    loadOrders();
+    loadNotifications();
+    setInterval(loadNotifications, 30000);
+  </script>
+</body>
+</html>

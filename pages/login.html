@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Login — Clever Store</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+  
+  <style>
+    .auth-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: linear-gradient(135deg, #ede9fe 0%, #e0e7ff 50%, #dbeafe 100%);
+    }
+
+    .auth-box {
+      background: #fff;
+      border-radius: var(--radius-xl);
+      padding: 44px 40px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: var(--shadow-xl);
+      border: 2px solid var(--primary-light);
+    }
+
+    .auth-logo {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      letter-spacing: -0.8px;
+      color: var(--gray-900);
+    }
+
+    .auth-logo span { color: var(--primary); }
+
+    .auth-subtitle {
+      color: var(--gray-500);
+      font-size: 0.95rem;
+      margin-bottom: 32px;
+    }
+
+    .form-error {
+      background: var(--danger-light);
+      border: 1px solid #fecaca;
+      color: #b91c1c;
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      font-size: 0.85rem;
+      margin-bottom: 20px;
+      display: none;
+      line-height: 1.5;
+      font-weight: 500;
+    }
+
+    .form-success {
+      background: var(--success-light);
+      border: 1px solid #a7f3d0;
+      color: #065f46;
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      font-size: 0.85rem;
+      margin-bottom: 20px;
+      display: none;
+      font-weight: 500;
+    }
+
+    .auth-footer {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 0.9rem;
+      color: var(--gray-500);
+    }
+
+    .auth-footer a { color: var(--primary); font-weight: 700; text-decoration: none; }
+    .auth-footer a:hover { text-decoration: underline; }
+
+    .divider {
+      text-align: center;
+      color: var(--gray-400);
+      font-size: 0.8rem;
+      margin: 20px 0;
+      position: relative;
+      font-weight: 500;
+    }
+
+    .divider::before, .divider::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 42%;
+      height: 1px;
+      background: var(--gray-200);
+    }
+    .divider::before { left: 0; }
+    .divider::after  { right: 0; }
+
+  </style>
+</head>
+<body>
+
+  <div class="auth-wrap">
+    <div class="auth-box">
+
+      <div class="auth-logo">Clever<span> store</span></div>
+      <p class="auth-subtitle">Sign in to your account</p>
+
+      <div class="form-success" id="login-success">
+        ✓ Account created successfully! You can now log in.
+      </div>
+
+      <div class="form-error" id="login-error"></div>
+
+      <div class="form-group" style="margin-bottom:18px;">
+        <label>Email</label>
+        <input type="text" id="email" placeholder="e.g. jane@example.com"/>
+      </div>
+
+      <div class="form-group" style="margin-bottom:24px;">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="Your password"
+          onkeydown="if(event.key==='Enter') login()"/>
+      </div>
+
+      <button class="btn btn-blue" id="btn-login" onclick="login()" style="width:100%;justify-content:center;padding:14px 22px;font-size:1rem;">
+        Log In
+      </button>
+
+      <div class="divider">or</div>
+
+      <div class="auth-footer">
+        Don't have an account? <a href="register.html">Create one</a>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="../js/auth.js"></script>
+  <script>
+    requireGuest();
+    if (window.location.search.includes('registered=1')) {
+      var el = document.getElementById('login-success');
+      if (el) el.style.display = 'block';
+    }
+  </script>
+</body>
+</html>
